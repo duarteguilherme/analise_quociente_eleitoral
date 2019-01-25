@@ -23,10 +23,12 @@ load_data <- function(filename) {
   if ( sum(de_data$desc_sit_cand_tot == "ELEITO POR MEDIA", na.rm=T) <= 0 ) {
     stop("Encoding error. Possibly problem with OS - Windows, Linux or Mac")  
   }
+  
+  de_data
 }
 
 
-data <- load_data('data/de_final_data.csv')
+
 
 clean_data <- function(data, year) {
   # Generate how seats are allocated
@@ -34,7 +36,6 @@ clean_data <- function(data, year) {
   
   
   d <- data %>% 
-    dplyr::filter(ano_eleicao == year) %>% 
     dplyr::select(ano_eleicao:nome_candidato, 
                   descricao_cargo, desc_sit_cand_tot, 
                   sigla_partido:de_tot_v_nominal_ptd, 
@@ -46,7 +47,7 @@ clean_data <- function(data, year) {
   
   # creating columns
   d <- d %>% 
-    group_by(ano_eleicao, sigla_uf) %>% 
+    group_by(sigla_uf) %>% 
     mutate(votos_validos = qtd_votos_nominais + qtd_votos_legenda) %>% 
     mutate(division = votos_validos / m_de) %>% 
     mutate(remainder = division %% 1) %>% 
