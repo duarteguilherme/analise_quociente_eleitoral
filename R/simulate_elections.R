@@ -116,8 +116,8 @@ clean_tipo_legenda <- function(d_uf) {
   # and if the number of seats are the same 
   n_seats_match <- n_seats == n_seats_real_life
   if ( n_seats_match == F ) {
-    print(glue::glue("For {d_final$sigla_uf[1]} and {d_final$ano_eleicao[1]}, predicted values and
-                     actual results didn't match."))
+    print(glue::glue("\n** For {d_final$sigla_uf[1]} and {d_final$ano_eleicao[1]}, predicted values and
+                     actual results didn't match. **\n"))
   }
   
   

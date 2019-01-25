@@ -19,6 +19,8 @@ check_prediction <- function(dataset_without_candidate, actual_elected) {
     arrange(numero_cand) %>%
     pull(numero_cand)
   
+  if (length(predicted_elected_deputies) != length(actual_elected_num))
+    stop("TRETA - Checar")
   return(all(predicted_elected_deputies == actual_elected_num))
 }
 
@@ -57,7 +59,7 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
 
 
 generate_relevants <- function(uf, year2 = year, actual_elected) {
-  cat(glue::glue("Running for {uf}. year = {year2}\n")) 
+  cat(glue::glue("Running for {uf}. year = {year2}\n\n\n")) 
 
   dataset <- generate_elected(filename, year2, uf) %>%
     mutate(party_or_colig = ifelse(tipo_legenda == "PARTIDO ISOLADO", sigla_partido,

@@ -91,13 +91,15 @@ ufs <-  results %>%
 
 
 # We have to introduce the real_elected_deputies
+
+ufs <- c("AC","AM","AP")
+
 relevants <- map_df(ufs, ~ generate_relevants(.x, year2 = year, actual_elected_deputies))
 
 
-relevants <- mutate(relevants, relevant = T)
+relevants <- mutate(relevants, relevance = T)
+
+table(relevants$relevance)
 
 
-de_data1 <- left_join(de_data, relevants)
-
-table(deputies_list$relevance)
 
