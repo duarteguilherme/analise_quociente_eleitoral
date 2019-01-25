@@ -30,7 +30,7 @@ load_data <- function(filename) {
 
 
 
-clean_data <- function(data, year) {
+clean_data <- function(data) {
   # Generate how seats are allocated
   # considering the partisan quotient
   

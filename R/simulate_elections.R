@@ -116,7 +116,7 @@ clean_tipo_legenda <- function(d_uf) {
   # and if the number of seats are the same 
   n_seats_match <- n_seats == n_seats_real_life
   if ( n_seats_match == F ) {
-    print(glue::glue("For {d_final$sigla_uf[1]} and {d_final$ano_eleicao}, predicted values and
+    print(glue::glue("For {d_final$sigla_uf[1]} and {d_final$ano_eleicao[1]}, predicted values and
                      actual results didn't match."))
   }
   
@@ -142,7 +142,7 @@ clean_tipo_legenda <- function(d_uf) {
 
 
 
-generate_elected <- function(filename, year) {
+generate_elected <- function(filename, year, uf = "") {
 # This function runs our algorithm
 # for finding elected deputies: 
 # It returns a dataset with
@@ -153,13 +153,16 @@ generate_elected <- function(filename, year) {
   data <- dplyr::filter(data, ano_eleicao == year)
   dataset <- clean_data(data)
   
+  if (uf != "")
+    dataset <- dplyr::filter(dataset, sigla_uf == uf)
+  
   
 
-  # Separate dataset by ids
-  # Ids represent different elections
-  d <- dataset %>%
-    split(.$id)
-  
+#  # Separate dataset by ids
+#  # Ids represent different elections
+    d <- dataset %>%
+      split(.$id)
+
   # Running clean_tipo_legenda for all states
   results <- map_df(d, clean_tipo_legenda ) 
   
