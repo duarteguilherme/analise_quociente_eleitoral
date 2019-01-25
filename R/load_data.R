@@ -3,13 +3,20 @@
 #' to load a datafile
 #' 
 #' 
+
+library(dplyr)
+library(tidyr)
+library(purrr)
+
+
+
 load_data <- function(filename) {
   de_data <- read.csv(filename,  encoding = "latin1", stringsAsFactors = F, sep = ';')
   
   #' Removing not ascii characters
   
   de_data <- de_data %>%
-    mutate_at(vars(desc_sit_cand_tot), function(x) iconv(x, from = "utf8", to = "ascii//translit"))
+    mutate_at(vars(desc_sit_cand_tot), function(x) iconv(x, from = "latin1", to = "ascii//translit"))
   
   
   #' Encoding test
@@ -19,6 +26,7 @@ load_data <- function(filename) {
 }
 
 
+data <- load_data('data/de_final_data.csv')
 
 clean_data <- function(data, year) {
   # Generate how seats are allocated
