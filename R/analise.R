@@ -1,11 +1,4 @@
-# cleaning the environment
-rm(list=ls())
 
-# set directory
-workd <- setwd("C:/Users/thiago.moreira/Dropbox/TAMU/cheibub/TallziaCode")
-workd <- setwd("/Users/thiagomqmoreira/Dropbox/New_Data/Final_Data")
-workd <- setwd('~/Downloads/')
-getwd()
 
 # open packages
 library(tidyverse)
@@ -24,11 +17,8 @@ year <- 2006
 ###################### Dataset #######################
 ######################################################
 
-de_data <- read.csv("de_final_data.csv",  encoding = "latin1", stringsAsFactors = F)
-de_data <- de_data %>% rename(nome_candidato = nome_candidato.x)
-table(de_data$desc_sit_cand_tot)
-#de_data <- de_data %>% mutate(desc_sit_cand_tot = recode(desc_sit_cand_tot, "ELEITO POR QP" = "ELEITO"))
-source("data_class_correction.R")
+
+
 
 
 ##########################################################################################
@@ -39,46 +29,6 @@ source("data_class_correction.R")
 #######################
 # First function
 #######################
-
-clean_data <- function(data, year) {
-  # Generate how seats are allocated
-  # considering the partisan quotient
-  
-  
-  d <- data %>% 
-    dplyr::filter(ano_eleicao == year) %>% 
-    dplyr::select(ano_eleicao:nome_candidato, 
-                  descricao_cargo, desc_sit_cand_tot, 
-                  sigla_partido:de_tot_v_nominal_ptd, 
-                  de_tot_v_legenda_ptd, 
-                  de_tot_v_nominal_colig, 
-                  de_tot_v_legenda_colig, 
-                  de_tot_v_total_ptd:qtd_votos_legenda, 
-                  m_de)
-  
-  # creating columns
-  d <- d %>% 
-    group_by(ano_eleicao, sigla_uf) %>% 
-    mutate(votos_validos = qtd_votos_nominais + qtd_votos_legenda) %>% 
-    mutate(division = votos_validos / m_de) %>% 
-    mutate(remainder = division %% 1) %>% 
-    mutate(round_remainder = ifelse(remainder <= .5, 0, 1)) %>% 
-    mutate(int_div = votos_validos %/% m_de) %>% 
-    mutate(quociente_eleitoral = int_div + round_remainder) %>% 
-    filter(de_tot_v_total_colig >= quociente_eleitoral) %>% 
-    mutate(cand_perc_qe = tot_votos_nominais / quociente_eleitoral) %>% 
-    mutate(quociente_partidario = de_tot_v_total_colig %/% quociente_eleitoral) %>%
-    ungroup() # check if a group_by is necessary, this might be a source of errors
-  
-  d <- d %>%
-    mutate(desc_sit_cand_tot = ifelse(desc_sit_cand_tot == "ELEITO POR QP",
-                                      "ELEITO", 
-                                      desc_sit_cand_tot)) %>%
-    # create an id for elections and uf
-    mutate(id = stringr::str_c(ano_eleicao, "_", sigla_uf))
-  
-  d
-}
 
 
 #############################
