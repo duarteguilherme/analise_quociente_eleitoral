@@ -35,7 +35,7 @@ find_leftover <- function(d_final) {
     location_party <- unique(filter(d_final, sigla_partido == party)$quociente_partidario) +
       unique(d_final$vaga_por_media[d_final$sigla_partido == party])
     
-    d_final$resultado[d_final$sigla_partido == party][location_party] <- "ELEITO POR MEDIA"
+    suppressWarnings(d_final$resultado[d_final$sigla_partido == party][location_party] <- "ELEITO POR MEDIA")
     
   } else {
     # tipo == "COLIGACAO"
@@ -51,7 +51,7 @@ find_leftover <- function(d_final) {
     location_colig <- unique(d_final$quociente_partidario[d_final$nome_coligacao == colig]) +
       unique(d_final$vaga_por_media[d_final$nome_coligacao == colig])
     
-    d_final$resultado[d_final$nome_coligacao == colig][location_colig] = "ELEITO POR MEDIA"
+    suppressWarnings(d_final$resultado[d_final$nome_coligacao == colig][location_colig] <- "ELEITO POR MEDIA")
   }
   d_final
 }
@@ -60,7 +60,6 @@ find_leftover <- function(d_final) {
 
 
 clean_tipo_legenda <- function(d_uf) {
-  print(d_uf$sigla_uf[1])
   # For a certain year and state
   # it calculates elected deputies
   # and compares it with the actual results
@@ -93,7 +92,8 @@ clean_tipo_legenda <- function(d_uf) {
   if ( d_final$left_to_distribute[1] > 0 )
     # A purrr trick to run the function recursively
     # n times, n = number of leftovers
-    d_final <- reduce(rerun(d_final$left_to_distribute[1], find_leftover), compose)(d_final)
+    for (i in 1:d_final$left_to_distribute[1])
+      d_final <- reduce(rerun(d_final$left_to_distribute[1], find_leftover), compose)(d_final)
   
   n_seats <- d_final %>% distinct(m_de) %>% pull 
   

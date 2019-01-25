@@ -37,13 +37,11 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
   
   
   for (k in 1:nrow(party_candidates)) {
-    print(k)
     if ( filter(dataset, numero_cand != party_candidates$numero_cand[k]) %>% 
          check_prediction(actual_elected)
          ) {
       dataset <- filter(dataset, numero_cand != party_candidates$numero_cand[k])
     }
-    k <- k + 1
     else {
       break
     }
@@ -74,13 +72,7 @@ generate_relevants <- function(uf, year2 = year, actual_elected) {
   # It also runs for parties with no elected deputies
   # This is a bug we must fix down the line
   
-  generate_relevants_by_party(parties[1], actual_elected, dataset)
-  generate_relevants_by_party(parties[2], actual_elected, dataset)
-  generate_relevants_by_party(parties[3], actual_elected, dataset)
-  generate_relevants_by_party(parties[4], actual_elected, dataset)
-  generate_relevants_by_party(parties[5], actual_elected, dataset)
-  generate_relevants_by_party(parties[6], actual_elected, dataset)
-  
+
   relevants <- map_df(parties, ~ generate_relevants_by_party(.x, actual_elected, dataset))
   relevants
 }
