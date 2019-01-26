@@ -90,7 +90,7 @@ ufs <-  results %>%
   pull
 
 
-# We have to introduce the real_elected_deputies
+# We have to introduce the actual_elected_deputies
 
 ufs <- c("AC","AM","AP")
 

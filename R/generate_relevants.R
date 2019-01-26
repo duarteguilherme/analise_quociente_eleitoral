@@ -18,7 +18,7 @@ check_prediction <- function(dataset_without_candidate, actual_elected) {
   actual_elected_num <- actual_elected %>%
     arrange(numero_cand) %>%
     pull(numero_cand)
-  
+
   if (length(predicted_elected_deputies) != length(actual_elected_num))
     stop("TRETA - Checar")
   return(all(predicted_elected_deputies == actual_elected_num))
@@ -39,8 +39,14 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
   
   
   for (k in 1:nrow(party_candidates)) {
+    # Check if the candidate was elected and break if so
+    if ( !is.na(party_candidates$resultado[k]) )
+      break
+    
+    # Now it check if removing this candidate
+    # changes the election result
     if ( filter(dataset, numero_cand != party_candidates$numero_cand[k]) %>% 
-         check_prediction(actual_elected)
+         check_prediction(actual_elected)  
          ) {
       dataset <- filter(dataset, numero_cand != party_candidates$numero_cand[k])
     }
@@ -52,7 +58,8 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
   party_relevants <- dataset %>%
     filter(party_or_colig == party) %>%
     arrange(tot_votos_nominais) 
-  
+
+    
   
   party_relevants   
 }
