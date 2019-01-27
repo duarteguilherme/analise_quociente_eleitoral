@@ -14,7 +14,7 @@ source('R/generate_relevants.R')
 
 
 # Define year here
-year <- 2006
+year <- 2018
 
 # Define db filename here
 filename <- "data/de_complete_data.csv"

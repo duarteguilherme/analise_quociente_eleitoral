@@ -18,6 +18,10 @@ load_data <- function(filename) {
   de_data <- de_data %>%
     mutate_at(vars(desc_sit_cand_tot), function(x) iconv(x, from = "latin1", to = "ascii//translit"))
   
+  # This solution will solve problems regarding
+  # differences of tipo_legenda for different years
+  de_data <- de_data %>%
+    mutate_at(vars(tipo_legenda), function(x) iconv(toupper(x), from = "latin1", to = "ascii//translit"))
   
   #' Encoding test
   if ( sum(de_data$desc_sit_cand_tot == "ELEITO POR MEDIA", na.rm=T) <= 0 ) {
