@@ -17,7 +17,7 @@ source('R/generate_relevants.R')
 year <- 2006
 
 # Define db filename here
-filename <- "data/de_final_data.csv"
+filename <- "data/de_complete_data.csv"
 
 # For example, if we run this function
 # for this dataset only for year = 2006,
@@ -92,7 +92,6 @@ ufs <-  results %>%
 
 # We have to introduce the actual_elected_deputies
 
-ufs <- c("AC")
 
 relevants <- map_df(ufs, ~ generate_relevants(.x, year2 = year, actual_elected_deputies))
 

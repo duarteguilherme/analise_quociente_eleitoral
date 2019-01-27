@@ -11,7 +11,7 @@ library(purrr)
 
 
 load_data <- function(filename) {
-  de_data <- read.csv(filename,  encoding = "latin1", stringsAsFactors = F, sep = ';')
+  de_data <- read.csv(filename,  encoding = "latin1", stringsAsFactors = F, sep = ',')
   
   #' Removing not ascii characters
   
