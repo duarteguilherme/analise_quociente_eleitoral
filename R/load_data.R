@@ -46,18 +46,6 @@ clean_data <- function(data) {
                   m_de)
   
   # creating columns
-  d <- d %>% 
-    group_by(sigla_uf) %>% 
-    mutate(votos_validos = qtd_votos_nominais + qtd_votos_legenda) %>% 
-    mutate(division = votos_validos / m_de) %>% 
-    mutate(remainder = division %% 1) %>% 
-    mutate(round_remainder = ifelse(remainder <= .5, 0, 1)) %>% 
-    mutate(int_div = votos_validos %/% m_de) %>% 
-    mutate(quociente_eleitoral = int_div + round_remainder) %>% 
-    filter(de_tot_v_total_colig >= quociente_eleitoral) %>% 
-    mutate(cand_perc_qe = tot_votos_nominais / quociente_eleitoral) %>% 
-    mutate(quociente_partidario = de_tot_v_total_colig %/% quociente_eleitoral) %>%
-    ungroup() # check if a group_by is necessary, this might be a source of errors
   
   d <- d %>%
     mutate(desc_sit_cand_tot = ifelse(desc_sit_cand_tot == "ELEITO POR QP",

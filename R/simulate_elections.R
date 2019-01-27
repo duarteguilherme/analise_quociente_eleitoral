@@ -13,83 +13,90 @@ find_leftover <- function(d_final) {
   # allocates the leftover seats
   
   d_final <- d_final %>%
-    mutate(media = de_tot_v_total_colig / 
+    mutate(media = de_tot_v_total_legenda / 
              (d_final$quociente_partidario + d_final$vaga_por_media + 1)) %>%
     mutate(max_media = max(media))
   
-  tipo <- d_final %>% 
-    arrange(desc(media)) %>%
-    summarise(tipo = first(tipo_legenda)) %>%
-    pull
+  legenda <-  d_final %>% 
+      arrange(desc(media)) %>%
+      summarise(tipo = first(party_or_colig)) %>%
+      pull
+    
+  d_final <- d_final %>%
+      mutate(vaga_por_media = (party_or_colig == legenda) + vaga_por_media)
+    
+  location_party <- unique(filter(d_final, party_or_colig == legenda)$quociente_partidario) +
+      unique(d_final$vaga_por_media[d_final$party_or_colig == legenda])
+    
+  d_final$resultado[d_final$party_or_colig == legenda][location_party] <- "ELEITO POR MEDIA"
   
-  if(tipo == "PARTIDO ISOLADO") {
-    
-    party <-  d_final %>% 
-      arrange(desc(media)) %>%
-      summarise(tipo = first(sigla_partido)) %>%
-      pull
-    
-    d_final <- d_final %>%
-      mutate(vaga_por_media = (sigla_partido == party) + vaga_por_media)
-    
-    location_party <- unique(filter(d_final, sigla_partido == party)$quociente_partidario) +
-      unique(d_final$vaga_por_media[d_final$sigla_partido == party])
-    
-    d_final$resultado[d_final$sigla_partido == party][location_party] <- "ELEITO POR MEDIA"
-    
-  } else {
-    # tipo == "COLIGACAO"
-    
-    colig <- d_final %>% 
-      arrange(desc(media)) %>%
-      summarise(tipo = first(nome_coligacao)) %>%
-      pull
-    
-    d_final <- d_final %>%
-      mutate(vaga_por_media = (nome_coligacao == colig) + vaga_por_media)
-    
-    location_colig <- unique(d_final$quociente_partidario[d_final$nome_coligacao == colig]) +
-      unique(d_final$vaga_por_media[d_final$nome_coligacao == colig])
-    
-    d_final$resultado[d_final$nome_coligacao == colig][location_colig] <- "ELEITO POR MEDIA"
-  }
-  d_final
+  d_final    
 }
 
 
 
 
-clean_tipo_legenda <- function(d_uf) {
+clean_tipo_legenda <- function(d_uf, original = F) {
   # For a certain year and state
   # it calculates elected deputies
   # and compares it with the actual results
-  d_uf$resultado <- NA
+  # argument original tests if dataset is consistent
   
-  d_isolado <- d_uf %>% 
-    filter(tipo_legenda == "PARTIDO ISOLADO") %>% 
-    group_by(sigla_partido) %>% 
-    arrange(sigla_partido, desc(tot_votos_nominais)) %>% 
-    mutate(resultado = ifelse(row_number() <= quociente_partidario, "ELEITO QP", NA)) %>%
-    ungroup()  
+  d_uf <- d_uf %>%
+    mutate(party_or_colig = ifelse(tipo_legenda == "PARTIDO ISOLADO", sigla_partido,
+                                   ifelse(tipo_legenda == "COLIGACAO", nome_coligacao, NA))) 
+  d_uf <- d_uf %>%
+    mutate(votos_legenda = ifelse(tipo_legenda == "PARTIDO ISOLADO", de_tot_v_legenda_ptd,
+                                   ifelse(tipo_legenda == "COLIGACAO", de_tot_v_legenda_colig, NA))) 
   
-  d_coligacao <- d_uf %>% 
-    filter(tipo_legenda == "COLIGACAO")  %>% 
-    group_by(nome_coligacao) %>% 
-    arrange(nome_coligacao, desc(tot_votos_nominais))  %>% 
-    mutate(resultado = ifelse(row_number() <= quociente_partidario, "ELEITO QP", NA)) %>%
+  d_uf <- d_uf %>%
+    group_by(party_or_colig) %>%
+    mutate(de_tot_v_total_legenda = sum(tot_votos_nominais) + first(votos_legenda))
+    
+  
+  total_votos_nominais <- sum(d_uf$tot_votos_nominais, na.rm=T)
+  total_votos_legenda <- d_uf %>%
+    group_by(party_or_colig) %>%
+    summarise(votos_legenda = first(votos_legenda))
+  total_votos_legenda <- sum(total_votos_legenda$votos_legenda, na.rm=T)
+  
+  # Test for valid votes
+  if ( original ) {
+    if ( d_uf$qtd_votos_nominais[1] != (total_votos_nominais)) {
+      stop(stringr::str_c("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for nominal votes"))
+    }
+    if ( d_uf$qtd_votos_legenda[1] != (total_votos_legenda)) {
+      stop(stringr::str_c("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for legenda votes"))
+    }
+  }
+  
+  d_uf <- d_uf %>% 
+    mutate(votos_validos = total_votos_nominais + total_votos_legenda) %>% 
+    mutate(division = votos_validos / m_de) %>% 
+    mutate(remainder = division %% 1) %>% 
+    mutate(round_remainder = ifelse(remainder <= .5, 0, 1)) %>% 
+    mutate(int_div = votos_validos %/% m_de) %>% 
+    mutate(quociente_eleitoral = int_div + round_remainder) %>% 
+#    mutate(cand_perc_qe = tot_votos_nominais / quociente_eleitoral) %>% 
+    group_by(party_or_colig) %>%
+    mutate(quociente_partidario = de_tot_v_total_legenda %/% quociente_eleitoral) %>%
     ungroup()
   
-  d_final <- bind_rows(d_isolado, d_coligacao) %>%  
+  d_uf$resultado <- NA
+  
+
+  d_final <- d_uf %>% 
+    group_by(party_or_colig) %>% 
+    arrange(party_or_colig, desc(tot_votos_nominais))  %>% 
+    mutate(resultado = ifelse(row_number() <= quociente_partidario, "ELEITO QP", NA)) %>%
+    ungroup() %>%
     mutate(total_elec_qp = sum(!is.na(resultado))) %>% 
     mutate(left_to_distribute = m_de - total_elec_qp) %>% 
     mutate(vaga_por_media = 0) 
   
-  d_final <- d_final %>%
-    mutate(nome_coligacao = ifelse(is.na(nome_coligacao), sigla_partido, nome_coligacao))
-  
-  if (sum(is.na(d_final$nome_coligacao))) stop("Error. Some nome_coligacao is NA.")
-  if (sum(is.na(d_final$sigla_partido))) stop("Error. Some nome_coligacao is NA.")
-  
+
+  if (sum(is.na(d_final$party_or_colig))) stop("Error. Some party_or_colig is NA.")
+
   if ( d_final$left_to_distribute[1] > 0 )
     # A purrr trick to run the function recursively
     # n times, n = number of leftovers
@@ -144,14 +151,14 @@ clean_tipo_legenda <- function(d_uf) {
 
 
 
-generate_elected <- function(filename, year, uf = "") {
+generate_elected <- function(filename, year, uf = "", original = F) {
 # This function runs our algorithm
 # for finding elected deputies: 
 # It returns a dataset with
 # 'resultado' column
 # with who were elected in the election
   
-  data <- load_data('data/de_final_data.csv')
+  data <- load_data(filename)
   data <- dplyr::filter(data, ano_eleicao == year)
   dataset <- clean_data(data)
   
@@ -166,7 +173,7 @@ generate_elected <- function(filename, year, uf = "") {
       split(.$id)
 
   # Running clean_tipo_legenda for all states
-  results <- map_df(d, clean_tipo_legenda ) 
+  results <- map_df(d, ~ clean_tipo_legenda(.x, original) ) 
   
   results
 }

@@ -38,7 +38,7 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
     arrange(tot_votos_nominais) 
   
   
-  for (k in 1:nrow(party_candidates)) {
+  for (k in 1:38) { #nrow(party_candidates)) {
     # Check if the candidate was elected and break if so
     if ( !is.na(party_candidates$resultado[k]) )
       break
@@ -68,9 +68,7 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
 generate_relevants <- function(uf, year2 = year, actual_elected) {
   cat(glue::glue("Running for {uf}. year = {year2}\n\n\n")) 
 
-  dataset <- generate_elected(filename, year2, uf) %>%
-    mutate(party_or_colig = ifelse(tipo_legenda == "PARTIDO ISOLADO", sigla_partido,
-                                   ifelse(tipo_legenda == "COLIGACAO", nome_coligacao, NA))) 
+  dataset <- generate_elected(filename, year2, uf)
 
   parties <- dataset %>%
     distinct(party_or_colig) %>%

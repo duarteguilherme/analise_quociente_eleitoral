@@ -92,10 +92,14 @@ ufs <-  results %>%
 
 # We have to introduce the actual_elected_deputies
 
-ufs <- c("AC","AM","AP")
+ufs <- c("AC")
 
 relevants <- map_df(ufs, ~ generate_relevants(.x, year2 = year, actual_elected_deputies))
 
+
+ac <- results %>%
+  filter(sigla_uf == "AC") %>%
+  filter(!is.na(resultado))
 
 relevants <- mutate(relevants, relevance = T)
 
