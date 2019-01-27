@@ -38,7 +38,7 @@ generate_relevants_by_party <- function(party, actual_elected, dataset) {
     arrange(tot_votos_nominais) 
   
   
-  for (k in 1:38) { #nrow(party_candidates)) {
+  for (k in 1:nrow(party_candidates)) {
     # Check if the candidate was elected and break if so
     if ( !is.na(party_candidates$resultado[k]) )
       break

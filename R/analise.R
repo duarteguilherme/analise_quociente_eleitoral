@@ -23,7 +23,7 @@ filename <- "data/de_final_data.csv"
 # for this dataset only for year = 2006,
 # it will return a dataset that indicates
 # who the elected deputies were by state
-results <- generate_elected(filename, year)
+results <- generate_elected(filename, year, original = T)
 
 
 # This routine indicates the rows
