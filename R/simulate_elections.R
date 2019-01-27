@@ -63,10 +63,10 @@ clean_tipo_legenda <- function(d_uf, original = F) {
   # Test for valid votes
   if ( original ) {
     if ( d_uf$qtd_votos_nominais[1] != (total_votos_nominais)) {
-      stop(stringr::str_c("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for nominal votes"))
+      stop(glue::glue("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for nominal votes"))
     }
     if ( d_uf$qtd_votos_legenda[1] != (total_votos_legenda)) {
-      stop(stringr::str_c("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for legenda votes"))
+      stop(glue::glue("\nData for {d_uf$sigla_uf[1]} year {d_uf$ano_eleicao[1]} didn't match for legenda votes"))
     }
   }
   
