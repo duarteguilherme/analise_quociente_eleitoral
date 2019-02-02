@@ -25,7 +25,7 @@ load_data <- function(filename) {
     mutate_at(vars(tipo_legenda), function(x) toupper(x))
   
   #' Encoding test
-  if ( sum(de_data$desc_sit_cand_tot == "ELEITO POR MEDIA", na.rm=T) <= 0 ) {
+  if ( sum(de_data$desc_sit_cand_tot == "MEDIA", na.rm=T) <= 0 ) {
     stop("Encoding error. Possibly problem with OS - Windows, Linux or Mac")  
   }
   
@@ -56,6 +56,9 @@ clean_data <- function(data) {
     mutate(desc_sit_cand_tot = ifelse(desc_sit_cand_tot == "ELEITO POR QP",
                                       "ELEITO", 
                                       desc_sit_cand_tot)) %>%
+    mutate(desc_sit_cand_tot = ifelse(desc_sit_cand_tot == "ELEITO POR MEDIA",
+                                     "MEDIA", 
+                                     desc_sit_cand_tot)) %>%
     # create an id for elections and uf
     mutate(id = stringr::str_c(ano_eleicao, "_", sigla_uf))
   
